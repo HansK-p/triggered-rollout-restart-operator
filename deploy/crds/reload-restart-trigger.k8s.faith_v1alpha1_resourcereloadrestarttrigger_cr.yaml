@@ -1,7 +1,0 @@
-apiVersion: reload-restart-trigger.k8s.faith/v1alpha1
-kind: ResourceReloadRestartTrigger
-metadata:
-  name: example-resourcereloadrestarttrigger
-spec:
-  # Add fields here
-  size: 3

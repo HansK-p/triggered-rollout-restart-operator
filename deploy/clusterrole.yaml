@@ -20,6 +20,7 @@ rules:
   - replicasets
   - statefulsets
   verbs:
+  - get
   - patch
 - apiGroups:
   - reload-restart-trigger.k8s.faith
