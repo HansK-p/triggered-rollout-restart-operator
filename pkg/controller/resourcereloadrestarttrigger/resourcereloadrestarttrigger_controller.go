@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-	reloadrestarttriggerv1alpha1 "triggered-rollout-restart-operator/pkg/apis/reloadrestarttrigger/v1alpha1"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -20,6 +19,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	reloadrestarttriggerv1alpha1 "triggered-rollout-restart-operator/pkg/apis/reloadrestarttrigger/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_secretreloadrestarttrigger")
@@ -179,9 +180,10 @@ func updateTargetStatus(reqLogger logr.Logger, targetStatus *reloadrestarttrigge
 	err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: name}, target)
 
 	if err != nil {
-		reqLogger.Error(err, "Target not found", "error")
+		reqLogger.Error(err, "Target not found")
 		if errors.IsNotFound(err) {
 			targetStatus.State = "NotFound"
+			targetStatus.Triggers = triggerStatuses
 			return nil
 		}
 		targetStatus.State = "LookupError"
