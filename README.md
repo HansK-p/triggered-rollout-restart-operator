@@ -23,4 +23,4 @@ spec:
 
 A docker image will be published at irregular intervals as k8sfaith/triggered-rollout-restart-operator.
 
-Suggested RBAC rules when deploying the Operator are. See the deploy folder for files needed for a deployment.
+See the deploy folder for files needed for a Kubernetes deployment.
