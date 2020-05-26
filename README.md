@@ -12,10 +12,10 @@ metadata:
   namespace: website
 spec:
   triggers:
-  - name: nginx-config
-    kind: ConfigMap
-  - name: cert-tls
-    kind: Secret
+  - kind: ConfigMap
+    name: nginx-config
+  - kind: Secret
+    name: cert-tls
   targets:
   - kind: Deployment
     name: nginx
