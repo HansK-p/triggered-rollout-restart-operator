@@ -135,7 +135,7 @@ func updateTriggerStatus(reqLogger logr.Logger, triggerStatus *reloadrestarttrig
 	err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: name}, resource)
 	if err == nil {
 		triggerStatus.ResourceVersion = resource.GetResourceVersion()
-		triggerStatus.State = "Present"
+		triggerStatus.State = "Found"
 	} else if errors.IsNotFound(err) {
 		triggerStatus.State = "NotFound"
 	} else {
@@ -191,7 +191,7 @@ func updateTargetStatus(reqLogger logr.Logger, targetStatus *reloadrestarttrigge
 	}
 
 	reqLogger.V(3).Info("Target found")
-	targetStatus.State = "Present"
+	targetStatus.State = "Found"
 
 	reqLogger.Info("There have been changes to triggers and we found the target => restart the target")
 	mergePatch := []byte(fmt.Sprintf(`{"spec":{"template":{"metadata":{"annotations":{"%s":"%s"}}}}}`, rolloutAnnotationName, time.Now().Format(time.RFC3339)))
@@ -352,6 +352,7 @@ func ensureTargetStatusOrder(reqLogger logr.Logger, targetStatuses []reloadresta
 		if targetStatus.Kind == "" {
 			targetStatus.Kind = target.Kind
 			targetStatus.Name = target.Name
+			targetStatus.State = "NotChecked"
 		}
 		targetStatuses = append(targetStatuses, targetStatus)
 	}

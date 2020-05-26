@@ -137,7 +137,12 @@ func TestResourceReloadRestartTriggerController(t *testing.T) {
 	// Create a ReconcileResourceReloadRestartTrigger object with the scheme and fake client.
 	r := &ReconcileResourceReloadRestartTrigger{client: cl, scheme: s}
 
-	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{})
+	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{
+		"Deployment/deployment-1":               "NotChecked",
+		"Deployment/deployment-not-to-be-found": "NotChecked",
+		"DaemonSet/daemonset-1":                 "NotChecked",
+		"StatefulSet/statefulset-1":             "NotChecked",
+	})
 
 	// Update trigger resourceversion
 	for _, trigger := range triggers {
@@ -145,18 +150,18 @@ func TestResourceReloadRestartTriggerController(t *testing.T) {
 	}
 
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, true, map[string]string{
-		"Deployment/deployment-1":               "Present",
+		"Deployment/deployment-1":               "Found",
 		"Deployment/deployment-not-to-be-found": "NotFound",
-		"DaemonSet/daemonset-1":                 "Present",
-		"StatefulSet/statefulset-1":             "Present",
+		"DaemonSet/daemonset-1":                 "Found",
+		"StatefulSet/statefulset-1":             "Found",
 	})
 	removeRolloutAnnotation(t, namespace, targets, r)
 
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{
-		"Deployment/deployment-1":               "Present",
+		"Deployment/deployment-1":               "Found",
 		"Deployment/deployment-not-to-be-found": "NotFound",
-		"DaemonSet/daemonset-1":                 "Present",
-		"StatefulSet/statefulset-1":             "Present",
+		"DaemonSet/daemonset-1":                 "Found",
+		"StatefulSet/statefulset-1":             "Found",
 	})
 
 	// Add a configmap to watch to the crd. This should not trigger a rolling upgrade
@@ -165,20 +170,20 @@ func TestResourceReloadRestartTriggerController(t *testing.T) {
 
 	// Run reconcile. This should not trigger a rollout
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{
-		"Deployment/deployment-1":               "Present",
+		"Deployment/deployment-1":               "Found",
 		"Deployment/deployment-not-to-be-found": "NotFound",
-		"DaemonSet/daemonset-1":                 "Present",
-		"StatefulSet/statefulset-1":             "Present",
+		"DaemonSet/daemonset-1":                 "Found",
+		"StatefulSet/statefulset-1":             "Found",
 	})
 
 	// Make a change to the latest added configmap
 	updateResource(t, namespace, "ConfigMap", "configmap-2", r, "before-reconcile-test", "1st")
 	// Run reconcile. This should trigger a rollout
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, true, map[string]string{
-		"Deployment/deployment-1":               "Present",
+		"Deployment/deployment-1":               "Found",
 		"Deployment/deployment-not-to-be-found": "NotFound",
-		"DaemonSet/daemonset-1":                 "Present",
-		"StatefulSet/statefulset-1":             "Present",
+		"DaemonSet/daemonset-1":                 "Found",
+		"StatefulSet/statefulset-1":             "Found",
 	})
 	removeRolloutAnnotation(t, namespace, targets, r)
 
@@ -195,10 +200,10 @@ func TestResourceReloadRestartTriggerController(t *testing.T) {
 	triggers = newTriggers
 	updateCRD(t, namespace, name, triggers, targets, r)
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{
-		"Deployment/deployment-1":               "Present",
+		"Deployment/deployment-1":               "Found",
 		"Deployment/deployment-not-to-be-found": "NotFound",
-		"DaemonSet/daemonset-1":                 "Present",
-		"StatefulSet/statefulset-1":             "Present",
+		"DaemonSet/daemonset-1":                 "Found",
+		"StatefulSet/statefulset-1":             "Found",
 	})
 
 	// Remove targets which doesn't exist and reconcile. This should not trigger a rollout
@@ -214,17 +219,17 @@ func TestResourceReloadRestartTriggerController(t *testing.T) {
 	targets = newTargets
 	updateCRD(t, namespace, name, triggers, targets, r)
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, false, map[string]string{
-		"Deployment/deployment-1":   "Present",
-		"DaemonSet/daemonset-1":     "Present",
-		"StatefulSet/statefulset-1": "Present",
+		"Deployment/deployment-1":   "Found",
+		"DaemonSet/daemonset-1":     "Found",
+		"StatefulSet/statefulset-1": "Found",
 	})
 
 	// Change the secret and validate that a rollout is again initiated
 	updateResource(t, namespace, "Secret", "secret-1", r, "before-reconcile-test", "3dorsomething")
 	runAndValidateReconcile(t, namespace, name, triggers, targets, r, true, map[string]string{
-		"Deployment/deployment-1":   "Present",
-		"DaemonSet/daemonset-1":     "Present",
-		"StatefulSet/statefulset-1": "Present",
+		"Deployment/deployment-1":   "Found",
+		"DaemonSet/daemonset-1":     "Found",
+		"StatefulSet/statefulset-1": "Found",
 	})
 }
 
@@ -344,9 +349,9 @@ func validateStatusAfterReconcile(t *testing.T, namespace, name string,
 				t.Fatalf("Trigger status ResourceVersion for %s with name %s should have been '%s', but was '%s'",
 					triggerStatus.Kind, triggerStatus.Name, "NotFound", triggerStatus.State)
 			}
-		} else if triggerStatus.State != "Present" {
+		} else if triggerStatus.State != "Found" {
 			t.Fatalf("Trigger state ResourceVersion for %s with name %s should have been '%s', but was '%s'",
-				triggerStatus.Kind, triggerStatus.Name, "Present", triggerStatus.State)
+				triggerStatus.Kind, triggerStatus.Name, "Found", triggerStatus.State)
 		}
 	}
 	targetStatuses := crd.Status.Targets
@@ -363,7 +368,7 @@ func validateStatusAfterReconcile(t *testing.T, namespace, name string,
 		}
 		expectedTargetStatusState := expectedTargetStatusStates[fmt.Sprintf("%s/%s", targetStatus.Kind, targetStatus.Name)]
 		if targetStatus.State != expectedTargetStatusState {
-			t.Fatalf("State for target with kind %s and name %s was '%s', but should have been '%s'",
+			t.Errorf("State for target with kind %s and name %s was '%s', but should have been '%s'",
 				targetStatus.Kind, targetStatus.Name, targetStatus.State, expectedTargetStatusState)
 		}
 		targetTriggerStatuses := targetStatus.Triggers
