@@ -12,10 +12,10 @@ metadata:
   namespace: website
 spec:
   triggers:
-  - kind: ConfigMap
-    name: nginx-config
-  - kind: Secret
-    name: cert-tls
+  - name: nginx-config
+    kind: ConfigMap
+  - name: cert-tls
+    kind: Secret
   targets:
   - kind: Deployment
     name: nginx
@@ -23,4 +23,4 @@ spec:
 
 A docker image will be published at irregular intervals as k8sfaith/triggered-rollout-restart-operator.
 
-See the deploy folder for files needed for a Kubernetes deployment.
+Suggested RBAC rules when deploying the Operator are. See the deploy folder for files needed for a deployment.
