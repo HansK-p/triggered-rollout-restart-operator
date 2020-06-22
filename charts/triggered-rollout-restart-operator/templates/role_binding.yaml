@@ -5,9 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 subjects:
 - kind: ServiceAccount
-  name: triggered-rollout-restart-operator
+  name: {{ include "triggered-rollout-restart-operator.serviceAccountName" . }}
 roleRef:
   kind: Role
   name: triggered-rollout-restart-operator
-  namespace: {{ .Release.Namespace }}
   apiGroup: rbac.authorization.k8s.io
