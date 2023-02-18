@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
+
+	//v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,7 +31,7 @@ var _ = Describe("ReloadRestartTrigger controller", func() {
 
 	// Define utility constants for object names and testing timeouts/durations and intervals.
 	const (
-		crName        = "mesourcemeloadmestarttrigger-operator"
+		crName        = "resourcereloadrestarttrigger-operator"
 		image         = "nginx"
 		containerName = "nginx-container"
 		serviceName   = "nginx-service"
@@ -58,7 +59,7 @@ var _ = Describe("ReloadRestartTrigger controller", func() {
 		ctx := context.Background()
 
 		By("By creating a containing namespace")
-		nsSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
+		nsSpec := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
 		Expect(k8sClient.Create(ctx, nsSpec)).Should(Succeed())
 
 		By("Register a ResourceReloadRestartTrigger CRD")
@@ -109,10 +110,7 @@ var _ = Describe("ReloadRestartTrigger controller", func() {
 		// We'll need to retry getting this newly deployed application, given that creation may not immediately happen.
 		Eventually(func() bool {
 			err := k8sClient.Get(ctx, lookupKey, createdDeployment)
-			if err != nil {
-				return false
-			}
-			return true
+			return err == nil
 		}, timeout, interval).Should(BeTrue())
 
 		By("Deploying a DaemonSet which will be gracefully restarted by the Controller using annotation changes")
@@ -149,10 +147,7 @@ var _ = Describe("ReloadRestartTrigger controller", func() {
 		// We'll need to retry getting this newly deployed application, given that creation may not immediately happen.
 		Eventually(func() bool {
 			err := k8sClient.Get(ctx, lookupKey, createdDaemonSet)
-			if err != nil {
-				return false
-			}
-			return true
+			return err == nil
 		}, timeout, interval).Should(BeTrue())
 
 		By("Deploying a StatefulSet which will be gracefully restarted by the Controller using annotation changes")
@@ -190,10 +185,7 @@ var _ = Describe("ReloadRestartTrigger controller", func() {
 		// We'll need to retry getting this newly deployed application, given that creation may not immediately happen.
 		Eventually(func() bool {
 			err := k8sClient.Get(ctx, lookupKey, createdStatefulSet)
-			if err != nil {
-				return false
-			}
-			return true
+			return err == nil
 		}, timeout, interval).Should(BeTrue())
 
 		By("Deploying a CoonfigMap that will act as trigger")

@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -16,11 +15,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
-
-type eventObject struct {
-	metav1.TypeMeta
-	metav1.ObjectMeta
-}
 
 func findCRsMatchingEvent(logger logr.Logger, cli client.Client, eventObject client.Object) ([]*reloadrestarttriggerv1alpha1.ResourceReloadRestartTrigger, error) {
 	crs := []*reloadrestarttriggerv1alpha1.ResourceReloadRestartTrigger{}
@@ -45,7 +39,7 @@ func findCRsMatchingEvent(logger logr.Logger, cli client.Client, eventObject cli
 	} else if _, ok := eventObject.(*corev1.ConfigMap); ok {
 		eventObjectKind = "ConfigMap"
 	} else {
-		err := fmt.Errorf("The event object is not a Secret and not a ConfigMap")
+		err := fmt.Errorf("the event object is not a Secret and not a ConfigMap")
 		logger.V(0).Error(err, "The event object is not a secret and not a ConfigMap")
 		return crs, nil
 	}

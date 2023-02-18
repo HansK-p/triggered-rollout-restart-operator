@@ -60,7 +60,7 @@ func updateTargetStatus(reqLogger logr.Logger, targetStatus *reloadrestarttrigge
 			triggersHaveChanged = true
 		}
 	}
-	if triggersHaveChanged == false {
+	if !triggersHaveChanged {
 		reqLogger.V(2).Info("Nothing to do as no triggers have changed")
 		return nil
 	}
@@ -123,7 +123,7 @@ func reconcileCrd(reqLogger logr.Logger, r *ResourceReloadRestartTriggerReconcil
 			}
 		}
 	}
-	if isRelevant == false {
+	if !isRelevant {
 		reqLogger.V(3).Info("The request is not relevant as the request object isn't related to a trigger or the CRD")
 		return nil
 	}

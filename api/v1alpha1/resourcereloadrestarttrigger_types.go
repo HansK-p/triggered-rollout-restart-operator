@@ -1,5 +1,5 @@
 /*
-Copyright 2021.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,14 +78,12 @@ type ResourceReloadRestartTriggerSpec struct {
 type ResourceReloadRestartTriggerStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
 	Triggers []TriggerStatus `json:"triggers,omitempty"`
 	Targets  []TargetStatus  `json:"targets,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-
 // ResourceReloadRestartTrigger is the Schema for the resourcereloadrestarttriggers API
 type ResourceReloadRestartTrigger struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -95,7 +93,7 @@ type ResourceReloadRestartTrigger struct {
 	Status ResourceReloadRestartTriggerStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // ResourceReloadRestartTriggerList contains a list of ResourceReloadRestartTrigger
 type ResourceReloadRestartTriggerList struct {
