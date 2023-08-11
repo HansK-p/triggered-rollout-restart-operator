@@ -1,4 +1,7 @@
 # triggered-rollout-restart-operator
+
+It is recommended to use https://github.com/stakater/Reloader instead.
+
 Operator responsible for gracefully restart pods when depended resources change
 
 This oprator is based on the [Operator SDK](https://github.com/operator-framework/operator-sdk) and is used on order to make sure that pods are gracefully restarted after secrets have been updated by [Kubernetes Replicator](https://github.com/mittwald/kubernetes-replicator) or similar software.
